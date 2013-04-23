@@ -29,23 +29,70 @@ class Map
 
 class MapView
 
-  constructor: (@map, @tileImage, @tileSize, @tileScale = 1) ->
+  constructor: (@map, @tileImage, @pixelSize, @scale = 1) ->
+    @screenSize = @pixelSize * @scale
+    @init()
+
+  init: ->
+
+  tileToScreenCoords: (tileX, tileY) ->
+    D = @screenSize
+    return [tileX * D, tileY * D]
+
+  screenToTileCoords: (mouseX, mouseY) ->
+    D = @screenSize
+    return [Math.floor(mouseX / D), Math.floor(mouseY / D)]
+
+class TileMapView extends MapView
 
   draw: (ctx) ->
     @map.foreach (x, y) =>
-      S = @tileSize
+      S = @pixelSize
       tx = 11 # TODO
       ty = 8 # TODO
       sx = tx * S
       sy = ty * S
-      D = S * @tileScale
+      D = @screenSize
       dx = x * D
       dy = y * D
       ctx.drawImage @tileImage, sx, sy, S, S, dx, dy, D, D
 
-  screenToTileCoords: (mouseX, mouseY) ->
-    D = @tileSize * @tileScale
-    return [Math.floor(mouseX / D), Math.floor(mouseY / D)]
+class HoverMapView extends MapView
+
+  init: ->
+    super()
+    @location = null
+    @pressed = false
+    @color = 'cyan'
+
+  hover: (screenX, screenY) ->
+    @location = @screenToTileCoords(screenX, screenY)
+
+  blur: (screenX, screenY) ->
+    @location = null
+
+  up: ->
+    @pressed = false
+
+  down: ->
+    @pressed = true
+
+  draw: (ctx) ->
+    return if @location == null
+
+    oldAlpha = ctx.globalAlpha
+    if @pressed
+      ctx.globalAlpha = 0.7
+    else
+      ctx.globalAlpha = 0.3
+
+    corner = @tileToScreenCoords @location[0], @location[1]
+
+    ctx.fillStyle = @color
+    ctx.fillRect corner[0], corner[1], @screenSize, @screenSize
+
+    ctx.globalAlpha = oldAlpha
+
 
 # -------------------------
 
@@ -66,13 +113,28 @@ tiles = new Image()
 tiles.src = 'dustycraft-tiles.png'
 
 map = new Map(TILE_WIDTH, TILE_HEIGHT)
-mapView = new MapView(map, tiles, TILE_SIZE)
+tileMapView = new TileMapView(map, tiles, TILE_SIZE)
+hoverMapView = new HoverMapView(map, tiles, TILE_SIZE)
 
 canvas.addEventListener 'mousedown', (e) ->
-  console.log 'MOUSEDOWN', mapView.screenToTileCoords(e.offsetX, e.offsetY)
+  hoverMapView.down(e.offsetX, e.offsetY)
+  return false
+
+canvas.addEventListener 'mouseup', (e) ->
+  hoverMapView.up(e.offsetX, e.offsetY)
+  return false
+
+canvas.addEventListener 'mousemove', (e) ->
+  hoverMapView.hover(e.offsetX, e.offsetY)
+  return false
+
+canvas.addEventListener 'mouseleave', (e) ->
+  hoverMapView.blur()
+  return false
 
 animate = ->
-  mapView.draw ctx
+  tileMapView.draw ctx
+  hoverMapView.draw ctx
   requestAnimationFrame animate
 
 requestAnimationFrame animate
