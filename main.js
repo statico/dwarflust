@@ -58,21 +58,26 @@
 
   MapView = (function() {
 
-    function MapView(map, tileImage, tileSize) {
+    function MapView(map, tileImage, tileSize, tileScale) {
       this.map = map;
       this.tileImage = tileImage;
       this.tileSize = tileSize;
+      this.tileScale = tileScale != null ? tileScale : 1;
     }
 
     MapView.prototype.draw = function(ctx) {
       var _this = this;
       return this.map.foreach(function(x, y) {
-        var S, dx, dy, tx, ty;
+        var D, S, dx, dy, sx, sy, tx, ty;
         S = _this.tileSize;
-        tx = ty = 0;
-        dx = x * S;
-        dy = y * S;
-        return ctx.drawImage(_this.tileImage, tx, ty, S, S, dx, dy, S, S);
+        tx = 0;
+        ty = 3;
+        sx = tx * S;
+        sy = ty * S;
+        D = S * _this.tileScale;
+        dx = x * D;
+        dy = y * D;
+        return ctx.drawImage(_this.tileImage, sx, sy, S, S, dx, dy, D, D);
       });
     };
 

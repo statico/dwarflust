@@ -29,15 +29,19 @@ class Map
 
 class MapView
 
-  constructor: (@map, @tileImage, @tileSize) ->
+  constructor: (@map, @tileImage, @tileSize, @tileScale = 1) ->
 
   draw: (ctx) ->
     @map.foreach (x, y) =>
       S = @tileSize
-      tx = ty = 0 # TODO
-      dx = x * S
-      dy = y * S
-      ctx.drawImage @tileImage, tx, ty, S, S, dx, dy, S, S
+      tx = 0 # TODO
+      ty = 3
+      sx = tx * S
+      sy = ty * S
+      D = S * @tileScale
+      dx = x * D
+      dy = y * D
+      ctx.drawImage @tileImage, sx, sy, S, S, dx, dy, D, D
 
 # -------------------------
 
