@@ -76,6 +76,7 @@
         sprite = new PIXI.Sprite(tilesTexture);
         sprite.position.x = x * _this.pixelSize;
         sprite.position.y = y * _this.pixelSize;
+        sprite.width = sprite.width = _this.pixelSize;
         return _this.sprites.set(x, y, sprite);
       });
     }
@@ -95,7 +96,7 @@
 
   mapView = new MapView(map, 32);
 
-  stage = new PIXI.Stage(0x000000);
+  stage = new PIXI.Stage(0x000000, true);
 
   mapView.addToStage(stage);
 

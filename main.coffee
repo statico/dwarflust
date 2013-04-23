@@ -41,6 +41,7 @@ class MapView
       sprite = new PIXI.Sprite(tilesTexture)
       sprite.position.x = x * @pixelSize
       sprite.position.y = y * @pixelSize
+      sprite.width = sprite.width = @pixelSize
       @sprites.set x, y, sprite
 
   addToStage: (stage) ->
@@ -51,7 +52,7 @@ class MapView
 
 map = new Map(10, 10)
 mapView = new MapView(map, 32)
-stage = new PIXI.Stage(0x000000)
+stage = new PIXI.Stage(0x000000, true)
 mapView.addToStage stage
 
 animate = ->
