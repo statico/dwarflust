@@ -70,8 +70,8 @@
       return this.map.foreach(function(x, y) {
         var D, S, dx, dy, sx, sy, tx, ty;
         S = _this.tileSize;
-        tx = 0;
-        ty = 3;
+        tx = 1;
+        ty = 0;
         sx = tx * S;
         sy = ty * S;
         D = S * _this.tileScale;

@@ -34,8 +34,8 @@ class MapView
   draw: (ctx) ->
     @map.foreach (x, y) =>
       S = @tileSize
-      tx = 0 # TODO
-      ty = 3
+      tx = 1 # TODO
+      ty = 0
       sx = tx * S
       sy = ty * S
       D = S * @tileScale
