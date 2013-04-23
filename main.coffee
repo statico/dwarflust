@@ -1,9 +1,3 @@
-renderer = new PIXI.CanvasRenderer(800, 400)
-renderer.view.id = 'canvas'
-document.body.appendChild renderer.view
-
-tilesTexture = new PIXI.Texture.fromImage 'dustycraft-tiles.png'
-
 CHECK = (condition, message) ->
   if not condition
     console.error "CHECK FAILED: #{ message }"
@@ -35,34 +29,40 @@ class Map
 
 class MapView
 
-  constructor: (@map, @pixelSize) ->
-    @sprites = new Map(@map.width, @map.height)
-    @sprites.foreach (x, y) =>
-      sprite = new PIXI.Sprite(tilesTexture)
-      sprite.position.x = x * @pixelSize
-      sprite.position.y = y * @pixelSize
-      sprite.width = sprite.width = @pixelSize
-      @sprites.set x, y, sprite
+  constructor: (@map, @tileImage, @tileSize) ->
 
-  addToStage: (stage) ->
-    @sprites.foreach (x, y) =>
-      stage.addChild @sprites.get(x, y)
+  draw: (ctx) ->
+    @map.foreach (x, y) =>
+      S = @tileSize
+      tx = ty = 0 # TODO
+      dx = x * S
+      dy = y * S
+      ctx.drawImage @tileImage, tx, ty, S, S, dx, dy, S, S
 
 # -------------------------
 
+canvas = document.createElement 'canvas'
+canvas.width = 800
+canvas.height = 400
+canvas.id = 'canvas'
+document.body.appendChild canvas
+
+ctx = canvas.getContext '2d'
+CHECK ctx, 'Got 2D context'
+
+tiles = new Image()
+tiles.src = 'dustycraft-tiles.png'
+
 map = new Map(10, 10)
-mapView = new MapView(map, 32)
-stage = new PIXI.Stage(0x000000, true)
-mapView.addToStage stage
+mapView = new MapView(map, tiles, 32)
 
 animate = ->
-  renderer.render stage
+  mapView.draw ctx
   requestAnimationFrame animate
 
 requestAnimationFrame animate
 
-$(document)
-  .attr('unselectable', 'on')
-  .css('user-select', 'none')
-  .on('selectstart', false)
-
+# Disable delect.
+document.unselectable = 'on'
+document.body.style.userSelect = 'none'
+document.addEventListener 'selectstart', -> false
