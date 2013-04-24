@@ -26,10 +26,25 @@ class Map
       for x in [0...@width]
         cb x, y
 
+TileSources = {}
+TileSources.dusty = new Image()
+TileSources.dusty.src = 'dustycraft-tiles.png'
+TileSources.dwarves = new Image()
+TileSources.dwarves.src = 'rpgmaker-dwarves.png'
+
+Tiles =
+  sky: ['dusty', 2, 11]
+  grass: ['dusty', 3, 0]
+  dirt: ['dusty', 2, 0]
+  rock: ['dusty', 1, 0]
+  coal: ['dusty', 2, 2]
+  gold: ['dusty', 0, 2]
+  silver: ['dusty', 2, 3]
+  dwarf: ['dwarves', 1, 0]
 
 class MapView
 
-  constructor: (@map, @tileImage, @pixelSize, @scale = 1) ->
+  constructor: (@map, @pixelSize, @scale = 1) ->
     @screenSize = @pixelSize * @scale
     @init()
 
@@ -47,15 +62,26 @@ class TileMapView extends MapView
 
   draw: (ctx) ->
     @map.foreach (x, y) =>
-      S = @pixelSize
-      tx = 11 # TODO
-      ty = 8 # TODO
-      sx = tx * S
-      sy = ty * S
-      D = @screenSize
-      dx = x * D
-      dy = y * D
-      ctx.drawImage @tileImage, sx, sy, S, S, dx, dy, D, D
+      obj = @map.get x, y
+
+      # Background
+      contents = obj.contents
+      if y == 1 and contents == 'dirt' then contents = 'grass'
+      tuple = Tiles[contents]
+      CHECK tuple, "Tiles[#{ contents }]"
+      [source, sx, sy] = tuple
+      @drawTile ctx, source, sx, sy, x, y
+
+  drawTile: (ctx, source, sx, sy, dx, dy) ->
+    S = @pixelSize
+    spx = sx * S
+    spy = sy * S
+    D = @screenSize
+    dpx = dx * D
+    dpy = dy * D
+    CHECK source of TileSources, "TileSources[#{ source }] OK"
+    img = TileSources[source]
+    ctx.drawImage img, spx, spy, S, S, dpx, dpy, D, D
 
 class HoverMapView extends MapView
 
@@ -93,6 +119,25 @@ class HoverMapView extends MapView
 
     ctx.globalAlpha = oldAlpha
 
+buildWorld = (width, height) ->
+  map = new Map(width, height)
+  map.foreach (x, y) ->
+    obj =
+      contents: 'dirt'
+      seen: false
+      dug: false
+
+    if y == 0
+      obj.contents = 'sky'
+      obj.seen = true
+      obj.dug = true
+
+    if y == 1
+      obj.seen = true
+
+    map.set x, y, obj
+
+  return map
 
 # -------------------------
 
@@ -109,12 +154,10 @@ document.body.appendChild canvas
 ctx = canvas.getContext '2d'
 CHECK ctx, 'Got 2D context'
 
-tiles = new Image()
-tiles.src = 'dustycraft-tiles.png'
+map = buildWorld(TILE_WIDTH, TILE_HEIGHT)
 
-map = new Map(TILE_WIDTH, TILE_HEIGHT)
-tileMapView = new TileMapView(map, tiles, TILE_SIZE)
-hoverMapView = new HoverMapView(map, tiles, TILE_SIZE)
+tileMapView = new TileMapView(map, TILE_SIZE)
+hoverMapView = new HoverMapView(map, TILE_SIZE)
 
 canvas.addEventListener 'mousedown', (e) ->
   hoverMapView.down(e.offsetX, e.offsetY)
