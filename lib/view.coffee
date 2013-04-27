@@ -17,9 +17,11 @@ class View
     @game.loader.load()
 
   create: ->
+    @game.stage.canvas.className = 'game'
+
     @map.foreach (x, y) =>
       sprite = @game.createSprite(x * TILE_SIZE, y * TILE_SIZE, 'tiles')
-      sprite.animations.add 'dirt'
+      sprite.frame = 3
       @map.set x, y, sprite
 
   draw: ->
