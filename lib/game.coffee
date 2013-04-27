@@ -7,8 +7,14 @@ class Input
 class Cell
 
   constructor: ->
+    @discovered = false
+    @walkable = false
+    @earth = true
 
   makeSky: ->
+    @discovered = true
+    @walkable = true
+    @earth = false
 
 
 class State

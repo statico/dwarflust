@@ -1,7 +1,3 @@
-CHECK = (condition, message) ->
-  if not condition
-    console.error "CHECK FAILED: #{ message }"
-
 class Map
 
   constructor: (@width, @height) ->
@@ -11,14 +7,12 @@ class Map
 
   get: (x, y) ->
     row = @_map[y]
-    CHECK row?, "0 <= y < #{ @height }"
-    cell = row[x]
-    CHECK cell?, "0 <= x < #{ @width }"
-    return cell
+    return null if not row?
+    return row[x]
 
   set: (x, y, value) ->
     row = @_map[y]
-    CHECK row?, "0 <= y < #{ @height }"
+    return null if not row?
     row[x] = value
 
   foreach: (cb) ->
