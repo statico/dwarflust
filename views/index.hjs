@@ -5,6 +5,7 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
+    <script src="/javascripts/pixi.dev.js"></script>
     <script src="/index.js"></script>
   </body>
 </html>
