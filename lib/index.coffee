@@ -28,9 +28,9 @@ class Map
 
 TileSources = {}
 TileSources.dusty = new Image()
-TileSources.dusty.src = 'dustycraft-tiles.png'
+TileSources.dusty.src = '/images/dustycraft-tiles.png'
 TileSources.dwarves = new Image()
-TileSources.dwarves.src = 'rpgmaker-dwarves.png'
+TileSources.dwarves.src = '/images/rpgmaker-dwarves.png'
 
 Tiles =
   sky: ['dusty', 2, 11]
