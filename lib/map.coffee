@@ -1,3 +1,7 @@
+CHECK = (condition, message) ->
+  if not condition
+    console.error "CHECK FAILED: #{ message }"
+
 class Map
 
   constructor: (@width, @height) ->
