@@ -24,6 +24,13 @@ class View
     @game = new Phaser.Game(this, 'game', width, height, @init, @create, @draw)
     window.game = @game #XXX
 
+    @debug = document.createElement 'div'
+    @debug.style.position = 'absolute'
+    @debug.style.top = '10px'
+    @debug.style.left = '10px'
+    @debug.style.whiteSpace = 'pre'
+    document.body.appendChild @debug
+
   init: ->
     @game.loader.addSpriteSheet('tiles', TILESET_URL, 32, 32)
     @game.loader.load()
@@ -53,6 +60,9 @@ class View
     @selection.y = ty * TILE_SIZE
     @selection.exists = true
     @selection.alpha = if @game.input.mouse.isDown then 0.9 else 0.5
+
+    # Draw debug information about the cell.
+    @debug.textContent = JSON.stringify @state.map.get(tx, ty), null, '  '
 
   update: ->
     # Update cells from game state.
