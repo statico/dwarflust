@@ -10,10 +10,9 @@ class Input
 class Dwarf
 
   constructor: ->
-    @miningStrength = 10
-    @x = 0
-    @y = 0
-    @target = { x: 0, y: 0 }
+    @miningStrength = 40
+    @location = [0, 0]
+    @target = null
 
 class Cell
 
@@ -34,9 +33,10 @@ class Cell
   makeCrust: ->
     @discovered = true
 
-  mineAndAssertMass: (amount) ->
+  mineAndAssertMined: (amount) ->
     @mass = Math.max 0, @mass - amount
-    return @mass > 0
+    @mined = (@mass == 0)
+    return @mined
 
   calculateAttractiveness: ->
     return @mass / 150
@@ -55,12 +55,11 @@ class State
     @map.foreachRow 2, (x, y) => @map.get(x, y).makeCrust()
 
     @dwarf = new Dwarf()
-    target = @findMostAttractiveCell()
-    result = @findPath [0, 1], target.coords
+    @dwarf.target = @findMostAttractiveCell()
+    result = @findPath [0, 1], @dwarf.target.coords
     path = result.path
     last = path[path.length - 1]
-    @dwarf.x = last[0]
-    @dwarf.y = last[1]
+    @dwarf.location = last
 
   findPath: (start, end) ->
     return aStar
@@ -79,13 +78,23 @@ class State
     )
     @map.foreach (x, y) =>
       cell = @map.get(x, y)
-      queue.enq(cell) if cell.discovered
+      queue.enq(cell) if cell.discovered and cell.earth and not cell.mined
     return queue.deq()
 
   processInput: (commands) ->
-    # TODO
+    # TODO: commands
 
-
+    if @dwarf.target
+      cell = @dwarf.target
+      distance = @map.rectilinearDistance @dwarf.location, cell.coords
+      if distance <= 1
+        if cell.mineAndAssertMined @dwarf.miningStrength
+          for neighbor in @map.diagonalNeighbors cell.coords
+            [x, y] = neighbor
+            @map.get(x, y).discovered = true
+          @dwarf.target = null
+          @dwarf.location[0] = cell.x
+          @dwarf.location[1] = cell.y
 
 
 exports.State = State

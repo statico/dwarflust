@@ -6,7 +6,7 @@ TILE_SIZE = 32
 
 Tiles =
   BLANK: 113
-  DARK_DIRT: 38
+  DARK_DIRT: 37
   DIRT: 2
   DIRT_GRASS_ON_TOP: 3
   SELECTION: 211
@@ -77,7 +77,10 @@ class View
       else
         sprite.alpha = 0.6
 
-      if not cell.earth
+      if cell.earth and cell.mined
+        sprite.frame = Tiles.DARK_DIRT
+
+      else if not cell.earth
         sprite.frame = Tiles.SKY
 
       else
@@ -87,7 +90,7 @@ class View
           sprite.frame = Tiles.DIRT
 
     # Update dwarf
-    @dwarf.x = @state.dwarf.x * TILE_SIZE
-    @dwarf.y = @state.dwarf.y * TILE_SIZE
+    @dwarf.x = @state.dwarf.location[0] * TILE_SIZE
+    @dwarf.y = @state.dwarf.location[1] * TILE_SIZE
 
 exports.View = View
