@@ -4,16 +4,13 @@ map = require './map.coffee'
 
 TILE_SIZE = 32
 
-TILESET_URL = '/images/dustycraft-tiles.png'
-
-TILES =
+Tiles =
   BLANK: 113
   DARK_DIRT: 38
   DIRT: 2
   DIRT_GRASS_ON_TOP: 3
   SELECTION: 211
   SKY: 178
-
 
 class View
 
@@ -32,7 +29,8 @@ class View
     document.body.appendChild @debug
 
   init: ->
-    @game.loader.addSpriteSheet('tiles', TILESET_URL, 32, 32)
+    @game.loader.addSpriteSheet('tiles', '/images/dustycraft-tiles.png', 32, 32)
+    @game.loader.addSpriteSheet('dwarf', '/images/rpgmaker-dwarves.png', 32, 32)
     @game.loader.load()
 
   create: ->
@@ -40,12 +38,16 @@ class View
 
     @spriteMap.foreach (x, y) =>
       sprite = @game.createSprite x * TILE_SIZE, y * TILE_SIZE, 'tiles'
-      sprite.frame = TILES.BLANK
+      sprite.frame = Tiles.BLANK
       @spriteMap.set x, y, sprite
 
     @selection = @game.createSprite 0, 0, 'tiles'
     @selection.exists = false
-    @selection.frame = TILES.SELECTION
+    @selection.frame = Tiles.SELECTION
+
+    @dwarf = @game.createSprite 0, 0, 'dwarf'
+    @dwarf.animations.add 'dwarf', [0,1,2,1], 5, true
+    @dwarf.animations.play 'dwarf'
 
     @game.input.onDown.add ->
       console.log 'XXX', 'down'
@@ -71,12 +73,16 @@ class View
       sprite = @spriteMap.get x, y
 
       if not cell.earth
-        sprite.frame = TILES.SKY
+        sprite.frame = Tiles.SKY
 
       else
         if not @state.map.get(x, y-1)?.earth
-          sprite.frame = TILES.DIRT_GRASS_ON_TOP
+          sprite.frame = Tiles.DIRT_GRASS_ON_TOP
         else
-          sprite.frame = TILES.DIRT
+          sprite.frame = Tiles.DIRT
+
+    # Update dwarf
+    @dwarf.x = @state.dwarf.x * TILE_SIZE
+    @dwarf.y = @state.dwarf.y * TILE_SIZE
 
 exports.View = View

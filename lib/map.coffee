@@ -24,4 +24,20 @@ class Map
     for x in [0...@width]
       cb x, y
 
+  cardinalNeighbors: (x, y) ->
+    ret = []
+    if x >= 0 then ret.push [x-1, y]
+    if y >= 0 then ret.push [x, y-1]
+    if x < @width then ret.push [x+1, y]
+    if y < @height then ret.push [x, y+1]
+    return ret
+
+  diagonalNeighbors: (x, y) ->
+    ret = @cardinalNeighbors x, y
+    if x >=0 and y >= 0 then ret.push [x-1, y-1]
+    if x >=0 and y < @height then ret.push [x-1, y+1]
+    if x < @width and y >= 0 then ret.push [x+1, y-1]
+    if x < @width and y < @height then ret.push [x+1, y+1]
+    return ret
+
 exports.Map = Map

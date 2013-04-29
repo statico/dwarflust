@@ -9,6 +9,8 @@
     "browserify": "2.x",
     "browserify-middleware": "*",
     "coffee-script": "1.x",
-    "through": "*"
+    "through": "*",
+    "priorityqueuejs": "*",
+    "a-star": "*"
   }
 }
