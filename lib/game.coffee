@@ -1,3 +1,4 @@
+PriorityQueue = require 'priorityqueuejs'
 aStar = require 'a-star'
 
 map = require './map.coffee'
@@ -16,16 +17,29 @@ class Dwarf
 
 class Cell
 
-  constructor: ->
+  constructor: (@x, @y) ->
+    @coords = [@x, @y]
     @discovered = false
     @walkable = false
     @earth = true
     @mass = 90 + Math.floor(Math.random() * 20)
+    @mined = false
 
   makeSky: ->
     @discovered = true
     @walkable = true
     @earth = false
+    @mined = true
+
+  makeCrust: ->
+    @discovered = true
+
+  mineAndAssertMass: (amount) ->
+    @mass = Math.max 0, @mass - amount
+    return @mass > 0
+
+  calculateAttractiveness: ->
+    return @mass / 150
 
 class State
 
@@ -33,18 +47,16 @@ class State
     @map = new map.Map(@width, @height)
 
     @map.foreach (x, y) =>
-      cell = new Cell()
+      cell = new Cell(x, y)
       @map.set x, y, cell
 
-    for row in [0..1]
-      @map.foreachRow row, (x, y) =>
-        @map.get(x, y).makeSky()
-
-    @map.foreachRow 2, (x, y) =>
-      @map.get(x, y).discovered = true
+    @map.foreachRow 0, (x, y) => @map.get(x, y).makeSky()
+    @map.foreachRow 1, (x, y) => @map.get(x, y).makeSky()
+    @map.foreachRow 2, (x, y) => @map.get(x, y).makeCrust()
 
     @dwarf = new Dwarf()
-    result = @findPath [0, 1], [Math.floor(Math.random() * @width), 2]
+    target = @findMostAttractiveCell()
+    result = @findPath [0, 1], target.coords
     path = result.path
     last = path[path.length - 1]
     @dwarf.x = last[0]
@@ -60,6 +72,15 @@ class State
       distance: (from, to) => @map.euclideanDistance from, to
       heuristic: (to) => @map.rectilinearDistance end, to
       hash: (coord) -> "#{ coord[0] }-#{ coord[1] }"
+
+  findMostAttractiveCell: ->
+    queue = new PriorityQueue((a, b) ->
+      a.calculateAttractiveness() - b.calculateAttractiveness()
+    )
+    @map.foreach (x, y) =>
+      cell = @map.get(x, y)
+      queue.enq(cell) if cell.discovered
+    return queue.deq()
 
   processInput: (commands) ->
     # TODO
