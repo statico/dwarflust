@@ -41,10 +41,25 @@ class State
         @map.get(x, y).makeSky()
 
     @dwarf = new Dwarf()
-    @dwarf.x = @dwarf.target.x = Math.floor Math.random() * @width
-    @dwarf.y = @dwarf.target.y = 1
+    result = @findPath [0, 1], [Math.floor(Math.random() * @width), 2]
+    path = result.path
+    last = path[path.length - 1]
+    @dwarf.x = last[0]
+    @dwarf.y = last[1]
+
+  findPath: (start, end) ->
+    return aStar
+      start: start
+      isEnd: (coord) -> coord[0] == end[0] and coord[1] == end[1]
+      neighbor: (coord) =>
+        neighbors = @map.cardinalNeighbors coord
+        return (n for n in neighbors when @map.get(n[0], n[1])?.walkable)
+      distance: (from, to) => @map.euclideanDistance from, to
+      heuristic: (to) => @map.rectilinearDistance end, to
+      hash: (coord) -> "#{ coord[0] }-#{ coord[1] }"
 
   processInput: (commands) ->
+    # TODO
 
 
 
