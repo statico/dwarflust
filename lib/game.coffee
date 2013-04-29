@@ -11,8 +11,12 @@ class Dwarf
 
   constructor: ->
     @miningStrength = 40
+    @moveSpeed = 3
     @location = [0, 0]
     @target = null
+
+  toString: ->
+    return JSON.stringify(this, null, '  ')
 
 class Cell
 
@@ -23,6 +27,10 @@ class Cell
     @earth = true
     @mass = 90 + Math.floor(Math.random() * 20)
     @mined = false
+
+  toString: ->
+    return JSON.stringify(this, null, '  ') + '\n' + \
+      "attractiveness: #{ @calculateAttractiveness() }"
 
   makeSky: ->
     @discovered = true
@@ -36,6 +44,7 @@ class Cell
   mineAndAssertMined: (amount) ->
     @mass = Math.max 0, @mass - amount
     @mined = (@mass == 0)
+    @walkable = true if @mined
     return @mined
 
   calculateAttractiveness: ->
@@ -55,11 +64,7 @@ class State
     @map.foreachRow 2, (x, y) => @map.get(x, y).makeCrust()
 
     @dwarf = new Dwarf()
-    @dwarf.target = @findMostAttractiveCell()
-    result = @findPath [0, 1], @dwarf.target.coords
-    path = result.path
-    last = path[path.length - 1]
-    @dwarf.location = last
+    @dwarf.location[1] = 1
 
   findPath: (start, end) ->
     return aStar
@@ -84,17 +89,32 @@ class State
   processInput: (commands) ->
     # TODO: commands
 
-    if @dwarf.target
-      cell = @dwarf.target
-      distance = @map.rectilinearDistance @dwarf.location, cell.coords
-      if distance <= 1
-        if cell.mineAndAssertMined @dwarf.miningStrength
-          for neighbor in @map.diagonalNeighbors cell.coords
-            [x, y] = neighbor
-            @map.get(x, y).discovered = true
-          @dwarf.target = null
-          @dwarf.location[0] = cell.x
-          @dwarf.location[1] = cell.y
+    if not @dwarf.target
+      @dwarf.target = @findMostAttractiveCell()
+      console.log 'XXX', @dwarf.toString()
+
+    cell = @dwarf.target
+    distance = @map.rectilinearDistance @dwarf.location, cell.coords
+    if distance > 1
+      # Move dwarf towards target.
+      result = @findPath @dwarf.location, cell.coords
+      path = result.path
+      if path.length <= @dwarf.moveSpeed
+        next = path[path.length - 1]
+      else
+        next = path[@dwarf.moveSpeed - 1]
+      @dwarf.location[0] = next[0]
+      @dwarf.location[1] = next[1]
+    else
+      # Dig!
+      if cell.mineAndAssertMined @dwarf.miningStrength
+        for coords in @map.diagonalNeighbors cell.coords
+          [x, y] = coords
+          neighbor = @map.get(x, y)
+          neighbor.discovered = true
+        @dwarf.location[0] = cell.x
+        @dwarf.location[1] = cell.y
+        @dwarf.target = null
 
 
 exports.State = State

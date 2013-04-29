@@ -26,6 +26,7 @@ class View
     @debug.style.top = '10px'
     @debug.style.left = '10px'
     @debug.style.whiteSpace = 'pre'
+    @debug.style.font = '10px/10px Menlo, Monaco, monospace'
     document.body.appendChild @debug
 
   init: ->
@@ -64,7 +65,10 @@ class View
     @selection.alpha = if @game.input.mouse.isDown then 0.9 else 0.5
 
     # Draw debug information about the cell.
-    @debug.textContent = JSON.stringify @state.map.get(tx, ty), null, '  '
+    text = @state.dwarf.toString() + '\n\n'
+    cell = @state.map.get(tx, ty)
+    if cell then text += cell.toString()
+    @debug.textContent = text
 
   update: ->
     # Update cells from game state.

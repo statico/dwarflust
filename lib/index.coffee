@@ -19,7 +19,7 @@ class Loop
 
   start: ->
     cb = => @step()
-    @timer = setInterval(cb, 1000)
+    @timer = setInterval(cb, 300)
 
   stop: ->
     clearTimeout @timer
