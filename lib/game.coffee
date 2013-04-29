@@ -40,6 +40,9 @@ class State
       @map.foreachRow row, (x, y) =>
         @map.get(x, y).makeSky()
 
+    @map.foreachRow 2, (x, y) =>
+      @map.get(x, y).discovered = true
+
     @dwarf = new Dwarf()
     result = @findPath [0, 1], [Math.floor(Math.random() * @width), 2]
     path = result.path

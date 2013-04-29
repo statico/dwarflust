@@ -72,6 +72,11 @@ class View
       cell = @state.map.get x, y
       sprite = @spriteMap.get x, y
 
+      if cell.discovered
+        sprite.alpha = 1
+      else
+        sprite.alpha = 0.6
+
       if not cell.earth
         sprite.frame = Tiles.SKY
 
