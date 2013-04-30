@@ -126,7 +126,7 @@ class State
       if cell.mineAndAssertMined @dwarf.miningStrength
         for p in @map.diagonalNeighbors cell.location
           neighbor = @map.get(p)
-          if neighbor? and not neighbor.discovered
+          if not neighbor.discovered
             neighbor.discovered = true
             neighbor.makeRandom()
         @dwarf.location.set cell.location
