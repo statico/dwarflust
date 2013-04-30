@@ -4,6 +4,8 @@ Vec2 = require('justmath').Vec2
 
 map = require './map.coffee'
 
+randInt = (min, max) -> min + Math.floor(Math.random() * (max - min))
+
 class Input
 
   constructor: (@command, @args) ->
@@ -25,12 +27,39 @@ class Cell
     @discovered = false
     @walkable = false
     @earth = true
-    @mass = 90 + Math.floor(Math.random() * 20)
+    @mass = randInt 90, 120
     @mined = false
+    @baseValue = randInt 1, 50
+    @contents = null
+    @amount = 0
 
   toString: ->
     return JSON.stringify(this, null, '  ') + '\n' + \
       "attractiveness: #{ @calculateAttractiveness() }"
+
+  calculateAttractiveness: ->
+    switch @contents
+      when 'gold' then return @baseValue + @amount * 500
+      when 'silver' then return @baseValue + @amount * 300
+      when 'copper' then return @baseValue + @amount * 150
+      else return @baseValue
+
+  makeRandom: ->
+    # TODO: Make this config-driven.
+    x = Math.random()
+    if x > .90
+      @contents = 'gold'
+    else if x > .80
+      @contents = 'silver'
+    else if x > .70
+      @contents = 'copper'
+    else
+      @contents = null
+
+    if @contents
+      @amount = randInt 1, 10
+    else
+      @amount = 0
 
   makeSky: ->
     @discovered = true
@@ -46,9 +75,6 @@ class Cell
     @mined = (@mass == 0)
     @walkable = true if @mined
     return @mined
-
-  calculateAttractiveness: ->
-    return @mass / 150
 
 class State
 
@@ -97,7 +123,9 @@ class State
       if cell.mineAndAssertMined @dwarf.miningStrength
         for p in @map.diagonalNeighbors cell.location
           neighbor = @map.get(p)
-          neighbor?.discovered = true
+          if neighbor? and not neighbor.discovered
+            neighbor.discovered = true
+            neighbor.makeRandom()
         @dwarf.location.set cell.location
         @dwarf.target = null
 
@@ -110,7 +138,7 @@ class State
       return
 
     # Get a path from the dwarf to the attractive cell.
-    path = @findPath(@dwarf.location, target.location)
+    path = @findPath @dwarf.location, target.location
 
     # Does the dwarf need to move closer?
     if path.length >= @dwarf.moveSpeed
@@ -125,7 +153,7 @@ class State
         distance = @map.rectilinearDistance p, target
         queue.enq({ distance: distance, point: p })
       cell = @map.get queue.deq().point
-      mine cell
+      mine cell if cell
       return
 
     return

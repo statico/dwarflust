@@ -9,6 +9,10 @@ TILE_SIZE = 32
 Tiles =
   BLANK: 113
   DARK_DIRT: 37
+  GOLD: 32
+  COPPER: 33
+  SILVER: 34
+  RUBY: 67
   DIRT: 2
   DIRT_GRASS_ON_TOP: 3
   SELECTION: 211
@@ -81,7 +85,7 @@ class View
       @target.exists = false
 
     # Draw debug information about the cell.
-    text = @state.dwarf.toString() + '\n\n'
+    text = '' # @state.dwarf.toString() + '\n\n'
     cell = @state.map.get(new Vec2(tx, ty))
     if cell then text += cell.toString()
     @debug.textContent = text
@@ -104,10 +108,15 @@ class View
         sprite.frame = Tiles.SKY
 
       else
-        if not @state.map.get(p.clone().sub(0, 1))?.earth
-          sprite.frame = Tiles.DIRT_GRASS_ON_TOP
-        else
-          sprite.frame = Tiles.DIRT
+        switch cell.contents
+          when 'gold' then sprite.frame = Tiles.GOLD
+          when 'silver' then sprite.frame = Tiles.SILVER
+          when 'copper' then sprite.frame = Tiles.COPPER
+          else
+            if not @state.map.get(p.clone().sub(0, 1))?.earth
+              sprite.frame = Tiles.DIRT_GRASS_ON_TOP
+            else
+              sprite.frame = Tiles.DIRT
 
     # Update dwarf
     @dwarf.x = @state.dwarf.location.x * TILE_SIZE
