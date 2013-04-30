@@ -30,13 +30,17 @@ class View
     @game = new Phaser.Game(this, 'game', pixelWidth, pixelHeight, @init, @create, @draw)
     window.game = @game #XXX
 
-    @debug = document.createElement 'div'
-    @debug.style.position = 'absolute'
-    @debug.style.top = '10px'
-    @debug.style.left = '10px'
-    @debug.style.whiteSpace = 'pre'
-    @debug.style.font = '10px/10px Menlo, Monaco, monospace'
-    document.body.appendChild @debug
+    @debug1 = document.createElement 'div'
+    @debug1.style.position = 'absolute'
+    @debug1.style.top = '10px'
+    @debug1.style.left = '10px'
+    @debug1.style.whiteSpace = 'pre'
+    @debug1.style.font = '10px/10px Menlo, Monaco, monospace'
+    document.body.appendChild @debug1
+
+    @debug2 = @debug1.cloneNode(true)
+    @debug2.style.left = '200px'
+    document.body.appendChild @debug2
 
   init: ->
     @game.loader.addSpriteSheet('tiles', '/images/dustycraft-tiles.png', 32, 32)
@@ -86,10 +90,9 @@ class View
       @target.exists = false
 
     # Draw debug information about the cell.
-    text = '' # @state.dwarf.toString() + '\n\n'
+    @debug1.textContent = @state.dwarf.toString()
     cell = @state.map.get(new Vec2(tx, ty))
-    if cell then text += cell.toString()
-    @debug.textContent = text
+    @debug2.textContent = if cell then cell.toString() else ''
 
     # Now we can start.
     @ready = true
