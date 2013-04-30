@@ -112,7 +112,10 @@ class State
     @map.foreach (p) =>
       cell = @map.get(p)
       queue.enq(cell) if cell.discovered and cell.earth and not cell.mined
-    return queue.deq()
+    if queue.size() > 0
+      return queue.deq()
+    else
+      return null
 
   processInput: (commands) ->
     # TODO: commands
@@ -131,6 +134,7 @@ class State
 
     # Find the most attractive cell.
     target = @dwarf.target = @findMostAttractiveCell()
+    return if not target # Game over?
 
     # Is the dwarf already there?
     if @map.rectilinearDistance(@dwarf.location, target.location) == 1
