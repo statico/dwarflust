@@ -1,5 +1,6 @@
 PriorityQueue = require 'priorityqueuejs'
 aStar = require 'a-star'
+Vec2 = require('justmath').Vec2
 
 map = require './map.coffee'
 
@@ -12,7 +13,7 @@ class Dwarf
   constructor: ->
     @miningStrength = 40
     @moveSpeed = 3
-    @location = [0, 0]
+    @location = new Vec2(0, 0)
     @target = null
 
   toString: ->
@@ -20,8 +21,7 @@ class Dwarf
 
 class Cell
 
-  constructor: (@x, @y) ->
-    @coords = [@x, @y]
+  constructor: (@location) ->
     @discovered = false
     @walkable = false
     @earth = true
@@ -52,37 +52,39 @@ class Cell
 
 class State
 
-  constructor: (@width, @height) ->
-    @map = new map.Map(@width, @height)
+  constructor: (size) ->
+    @size = new Vec2(size)
+    @map = new map.Map(@size)
 
-    @map.foreach (x, y) =>
-      cell = new Cell(x, y)
-      @map.set x, y, cell
+    @map.foreach (p) =>
+      cell = new Cell(p)
+      @map.set p, cell
 
-    @map.foreachRow 0, (x, y) => @map.get(x, y).makeSky()
-    @map.foreachRow 1, (x, y) => @map.get(x, y).makeSky()
-    @map.foreachRow 2, (x, y) => @map.get(x, y).makeCrust()
+    @map.foreachRow 0, (p) => @map.get(p).makeSky()
+    @map.foreachRow 1, (p) => @map.get(p).makeSky()
+    @map.foreachRow 2, (p) => @map.get(p).makeCrust()
 
     @dwarf = new Dwarf()
-    @dwarf.location[1] = 1
+    @dwarf.location.y = 1
 
   findPath: (start, end) ->
-    return aStar
+    results = aStar
       start: start
-      isEnd: (coord) -> coord[0] == end[0] and coord[1] == end[1]
-      neighbor: (coord) =>
-        neighbors = @map.cardinalNeighbors coord
-        return (n for n in neighbors when @map.get(n[0], n[1])?.walkable)
-      distance: (from, to) => @map.euclideanDistance from, to
-      heuristic: (to) => @map.rectilinearDistance end, to
-      hash: (coord) -> "#{ coord[0] }-#{ coord[1] }"
+      isEnd: (p) -> p.equals(end)
+      neighbor: (p) =>
+        neighbors = @map.cardinalNeighbors p
+        return (n for n in neighbors when @map.get(n)?.walkable)
+      distance: (p1, p2) => @map.euclideanDistance p1, p2
+      heuristic: (p) => @map.rectilinearDistance p, end
+      hash: (p) -> p.toString()
+    return results.path
 
   findMostAttractiveCell: ->
     queue = new PriorityQueue((a, b) ->
       a.calculateAttractiveness() - b.calculateAttractiveness()
     )
-    @map.foreach (x, y) =>
-      cell = @map.get(x, y)
+    @map.foreach (p) =>
+      cell = @map.get(p)
       queue.enq(cell) if cell.discovered and cell.earth and not cell.mined
     return queue.deq()
 
@@ -93,27 +95,25 @@ class State
       @dwarf.target = @findMostAttractiveCell()
 
     cell = @dwarf.target
-    distance = @map.rectilinearDistance @dwarf.location, cell.coords
+    distance = @map.rectilinearDistance @dwarf.location, cell.location
     if distance > 1
       # Move dwarf towards target.
-      result = @findPath @dwarf.location, cell.coords
-      path = result.path
+      path = @findPath @dwarf.location, cell.location
       if path.length <= @dwarf.moveSpeed
         next = path[path.length - 1]
       else
         next = path[@dwarf.moveSpeed - 1]
-      @dwarf.location[0] = next[0]
-      @dwarf.location[1] = next[1]
+      @dwarf.location.set next
     else
       # Dig!
       if cell.mineAndAssertMined @dwarf.miningStrength
-        for coords in @map.diagonalNeighbors cell.coords
-          [x, y] = coords
-          neighbor = @map.get(x, y)
+        for p in @map.diagonalNeighbors cell.location
+          neighbor = @map.get(p)
           neighbor.discovered = true
-        @dwarf.location[0] = cell.x
-        @dwarf.location[1] = cell.y
+        @dwarf.location.set cell.location
         @dwarf.target = null
+
+    return
 
 
 exports.State = State

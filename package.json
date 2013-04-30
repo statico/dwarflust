@@ -15,6 +15,7 @@
     "coffee-script": "1.x",
     "through": "*",
     "priorityqueuejs": "*",
-    "a-star": "*"
+    "a-star": "*",
+    "justmath": "*"
   }
 }

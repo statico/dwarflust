@@ -1,7 +1,9 @@
+Vec2 = require('justmath').Vec2
+
 game = require './game.coffee'
 view = require './view.coffee'
 
-gameState = new game.State(20, 15)
+gameState = new game.State(new Vec2(20, 15))
 gameView = new view.View(gameState)
 
 class Loop

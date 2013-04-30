@@ -1,5 +1,7 @@
 alert('Phaser not available') if not Phaser
 
+Vec2 = require('justmath').Vec2
+
 map = require './map.coffee'
 
 TILE_SIZE = 32
@@ -16,10 +18,11 @@ Tiles =
 class View
 
   constructor: (@state) ->
-    @spriteMap = new map.Map(state.width, state.height)
-    width = TILE_SIZE * @state.width
-    height = TILE_SIZE * @state.height
-    @game = new Phaser.Game(this, 'game', width, height, @init, @create, @draw)
+    @spriteMap = new map.Map(state.size)
+
+    pixelWidth = TILE_SIZE * @state.size.x
+    pixelHeight = TILE_SIZE * @state.size.y
+    @game = new Phaser.Game(this, 'game', pixelWidth, pixelHeight, @init, @create, @draw)
     window.game = @game #XXX
 
     @debug = document.createElement 'div'
@@ -38,10 +41,10 @@ class View
   create: ->
     @game.stage.canvas.className = 'game'
 
-    @spriteMap.foreach (x, y) =>
-      sprite = @game.createSprite x * TILE_SIZE, y * TILE_SIZE, 'tiles'
+    @spriteMap.foreach (p) =>
+      sprite = @game.createSprite p.x * TILE_SIZE, p.y * TILE_SIZE, 'tiles'
       sprite.frame = Tiles.BLANK
-      @spriteMap.set x, y, sprite
+      @spriteMap.set p, sprite
 
     @selection = @game.createSprite 0, 0, 'tiles'
     @selection.exists = false
@@ -72,22 +75,22 @@ class View
     # Draw debug target for dwarf.
     if @state.dwarf.target
       @target.exists = true
-      @target.x = @state.dwarf.target.x * TILE_SIZE
-      @target.y = @state.dwarf.target.y * TILE_SIZE
+      @target.x = @state.dwarf.target.location.x * TILE_SIZE
+      @target.y = @state.dwarf.target.location.y * TILE_SIZE
     else
       @target.exists = false
 
     # Draw debug information about the cell.
     text = @state.dwarf.toString() + '\n\n'
-    cell = @state.map.get(tx, ty)
+    cell = @state.map.get(new Vec2(tx, ty))
     if cell then text += cell.toString()
     @debug.textContent = text
 
   update: ->
     # Update cells from game state.
-    @state.map.foreach (x, y) =>
-      cell = @state.map.get x, y
-      sprite = @spriteMap.get x, y
+    @state.map.foreach (p) =>
+      cell = @state.map.get(p)
+      sprite = @spriteMap.get(p)
 
       if cell.discovered
         sprite.alpha = 1
@@ -101,13 +104,13 @@ class View
         sprite.frame = Tiles.SKY
 
       else
-        if not @state.map.get(x, y-1)?.earth
+        if not @state.map.get(p.clone().sub(0, 1))?.earth
           sprite.frame = Tiles.DIRT_GRASS_ON_TOP
         else
           sprite.frame = Tiles.DIRT
 
     # Update dwarf
-    @dwarf.x = @state.dwarf.location[0] * TILE_SIZE
-    @dwarf.y = @state.dwarf.location[1] * TILE_SIZE
+    @dwarf.x = @state.dwarf.location.x * TILE_SIZE
+    @dwarf.y = @state.dwarf.location.y * TILE_SIZE
 
 exports.View = View
