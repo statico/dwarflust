@@ -10,6 +10,7 @@ Tiles =
   DIRT: 2
   DIRT_GRASS_ON_TOP: 3
   SELECTION: 211
+  TARGET: 212
   SKY: 178
 
 class View
@@ -46,6 +47,10 @@ class View
     @selection.exists = false
     @selection.frame = Tiles.SELECTION
 
+    @target = @game.createSprite 0, 0, 'tiles'
+    @target.exists = false
+    @target.frame = Tiles.TARGET
+
     @dwarf = @game.createSprite 0, 0, 'dwarf'
     @dwarf.animations.add 'dwarf', [0,1,2,1], 5, true
     @dwarf.animations.play 'dwarf'
@@ -63,6 +68,14 @@ class View
     @selection.y = ty * TILE_SIZE
     @selection.exists = true
     @selection.alpha = if @game.input.mouse.isDown then 0.9 else 0.5
+
+    # Draw debug target for dwarf.
+    if @state.dwarf.target
+      @target.exists = true
+      @target.x = @state.dwarf.target.x * TILE_SIZE
+      @target.y = @state.dwarf.target.y * TILE_SIZE
+    else
+      @target.exists = false
 
     # Draw debug information about the cell.
     text = @state.dwarf.toString() + '\n\n'

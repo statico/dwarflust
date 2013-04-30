@@ -91,7 +91,6 @@ class State
 
     if not @dwarf.target
       @dwarf.target = @findMostAttractiveCell()
-      console.log 'XXX', @dwarf.toString()
 
     cell = @dwarf.target
     distance = @map.rectilinearDistance @dwarf.location, cell.coords
