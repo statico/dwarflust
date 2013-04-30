@@ -154,7 +154,7 @@ class State
     if path.length < @dwarf.moveSpeed
       queue = new PriorityQueue((a, b) -> b.distance - a.distance)
       for p in @map.cardinalNeighbors @dwarf.location
-        distance = @map.rectilinearDistance p, target
+        distance = @map.rectilinearDistance p, target.location
         queue.enq({ distance: distance, point: p })
       cell = @map.get queue.deq().point
       mine cell if cell
