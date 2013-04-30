@@ -90,28 +90,43 @@ class State
 
   processInput: (commands) ->
     # TODO: commands
+    @_updateDwarf()
 
-    if not @dwarf.target
-      @dwarf.target = @findMostAttractiveCell()
-
-    cell = @dwarf.target
-    distance = @map.rectilinearDistance @dwarf.location, cell.location
-    if distance > 1
-      # Move dwarf towards target.
-      path = @findPath @dwarf.location, cell.location
-      if path.length <= @dwarf.moveSpeed
-        next = path[path.length - 1]
-      else
-        next = path[@dwarf.moveSpeed - 1]
-      @dwarf.location.set next
-    else
-      # Dig!
+  _updateDwarf: ->
+    mine = (cell) =>
       if cell.mineAndAssertMined @dwarf.miningStrength
         for p in @map.diagonalNeighbors cell.location
           neighbor = @map.get(p)
           neighbor?.discovered = true
         @dwarf.location.set cell.location
         @dwarf.target = null
+
+    # Find the most attractive cell.
+    target = @dwarf.target = @findMostAttractiveCell()
+
+    # Is the dwarf already there?
+    if @map.rectilinearDistance(@dwarf.location, target.location) == 1
+      mine target
+      return
+
+    # Get a path from the dwarf to the attractive cell.
+    path = @findPath(@dwarf.location, target.location)
+
+    # Does the dwarf need to move closer?
+    if path.length >= @dwarf.moveSpeed
+      next = path[@dwarf.moveSpeed - 1]
+      @dwarf.location.set next
+
+    # Did the dwarf move fewer tiles than his move speed? If so, he still has
+    # a chance to swing his axe as part of the move.
+    if path.length < @dwarf.moveSpeed
+      queue = new PriorityQueue((a, b) -> b.distance - a.distance)
+      for p in @map.cardinalNeighbors @dwarf.location
+        distance = @map.rectilinearDistance p, target
+        queue.enq({ distance: distance, point: p })
+      cell = @map.get queue.deq().point
+      mine cell
+      return
 
     return
 
