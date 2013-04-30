@@ -50,7 +50,6 @@ class Map
 
   diagonalNeighbors: (p) ->
     ASSERT p instanceof Vec2
-    # TODO: Broken? See line 100 of game.coffee
     ret = @cardinalNeighbors p
     if p.x > 0 and p.y > 0 then ret.push new Vec2(p.x-1, p.y-1)
     if p.x > 0 and p.y < @size.y-1 then ret.push new Vec2(p.x-1, p.y+1)
