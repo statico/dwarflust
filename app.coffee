@@ -11,7 +11,7 @@ app = express()
 
 DEBUG = app.get('env') == 'development'
 
-app.set 'port', process.env.PORT or 3000
+app.set 'port', process.env.PORT or 5000
 app.set 'views', __dirname + '/views'
 app.set 'view engine', 'hjs'
 app.use express.favicon(__dirname + '/public/favicon.png')
