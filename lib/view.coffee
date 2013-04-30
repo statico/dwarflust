@@ -23,6 +23,7 @@ class View
 
   constructor: (@state) ->
     @spriteMap = new map.Map(state.size)
+    @ready = false
 
     pixelWidth = TILE_SIZE * @state.size.x
     pixelHeight = TILE_SIZE * @state.size.y
@@ -90,7 +91,12 @@ class View
     if cell then text += cell.toString()
     @debug.textContent = text
 
+    # Now we can start.
+    @ready = true
+
   update: ->
+    return if not @ready
+
     # Update cells from game state.
     @state.map.foreach (p) =>
       cell = @state.map.get(p)
