@@ -109,7 +109,7 @@ class State
       if cell.mineAndAssertMined @dwarf.miningStrength
         for p in @map.diagonalNeighbors cell.location
           neighbor = @map.get(p)
-          neighbor.discovered = true
+          neighbor?.discovered = true
         @dwarf.location.set cell.location
         @dwarf.target = null
 
