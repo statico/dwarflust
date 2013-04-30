@@ -130,7 +130,6 @@ class State
             neighbor.discovered = true
             neighbor.makeRandom()
         @dwarf.location.set cell.location
-        @dwarf.target = null
 
     # Find the most attractive cell.
     target = @dwarf.target = @findMostAttractiveCell()
@@ -148,6 +147,7 @@ class State
     if path.length >= @dwarf.moveSpeed
       next = path[@dwarf.moveSpeed - 1]
       @dwarf.location.set next
+      return
 
     # Did the dwarf move fewer tiles than his move speed? If so, he still has
     # a chance to swing his axe as part of the move.
