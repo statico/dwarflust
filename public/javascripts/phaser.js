@@ -4329,7 +4329,7 @@ var Phaser;
             this.loop = false;
             this.isPlaying = false;
             this.isDecoding = false;
-            this._context = context;
+            this._context = null; //context;
             this._gainNode = gainNode;
             this._buffer = data;
             this._volume = volume;
@@ -4399,9 +4399,9 @@ var Phaser;
             this._game = game;
             if(game.device.webaudio == true) {
                 if(!!window['AudioContext']) {
-                    this._context = new window['AudioContext']();
+                    //this._context = new window['AudioContext']();
                 } else if(!!window['webkitAudioContext']) {
-                    this._context = new window['webkitAudioContext']();
+                    //this._context = new window['webkitAudioContext']();
                 }
                 if(this._context !== null) {
                     this._gainNode = this._context.createGainNode();

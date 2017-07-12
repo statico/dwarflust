@@ -22,7 +22,7 @@ Tiles =
 class View
 
   constructor: (@state) ->
-    @spriteMap = new map.Map(state.size)
+    @spriteMap = new map.Map(@state.size)
     @ready = false
 
     pixelWidth = TILE_SIZE * @state.size.x
