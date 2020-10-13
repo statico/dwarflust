@@ -14,14 +14,8 @@ DEBUG = app.get('env') == 'development'
 app.set 'port', process.env.PORT or 5000
 app.set 'views', __dirname + '/views'
 app.set 'view engine', 'hjs'
-app.use express.favicon(__dirname + '/public/favicon.png')
-app.use express.logger('dev') if DEBUG
-app.use express.bodyParser()
-app.use express.methodOverride()
-app.use app.router
 app.use require('stylus').middleware(__dirname + '/public')
 app.use express.static(path.join(__dirname, 'public'))
-app.use express.errorHandler() if DEBUG
 
 compileCoffeeScript = (file) ->
   data = ''
